@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auth Forms</title>
+    <style>
+        :root {
+            --primary-color: #1c6ca7;
+            --secondary-color: #66c2e0;
+        }
+
+        body {
+            margin: 0;
+            background-color: var(--secondary-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            display: flex;
+            width: 800px;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+
+        .info-section {
+            background: var(--primary-color);
+            color: white;
+            padding: 40px;
+            width: 40%;
+            transition: transform 0.3s ease;
+        }
+
+        .form-section {
+            padding: 40px;
+            width: 60%;
+        }
+
+        .form-container {
+            display: none;
+        }
+
+        .form-container.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .btn {
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: opacity 0.3s ease;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #666;
+            color: white;
+            margin-top: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .toggle-link {
+            margin-top: 1rem;
+            display: block;
+            color: var(--primary-color);
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .popover {
+            position: absolute;
+            background: #333;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-size: 14px;
+            display: none;
+            z-index: 1000;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .joke-container {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            width: 300px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            min-height: 100px;
+            word-break: break-word;
+        }
+
+        .joke-content p {
+            margin: 0.5rem 0;
+            color: #333;
+        }
+
+        .punchline {
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-top: 1rem !important;
+        }
+        .category-selectors {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            justify-content: center;
+        }
+
+        .category-selectors select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+            min-width: 120px;
+        }
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .checkbox-group label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: #f5f5f5;
+            padding: 8px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .checkbox-group label:hover {
+            background: #e0e0e0;
+        }
+
+        .checkbox-group h3 {
+            width: 100%;
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
+        }
+
+        .joke-container {
+            margin-top: 1rem;
+            min-height: 100px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                width: 90%;
+            }
+
+            .info-section,
+            .form-section {
+                width: 100%;
+            }
+        }
+
+        .dashboard-container {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            flex-direction: column;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="info-section">
+        <h2>Welcome</h2>
+        <p id="form-message">Create your account to get started</p>
+        <button class="btn btn-primary" id="toggle-button" onclick="showForm('register')">
+            Have an Account? Login
+        </button>
+    </div>
+
+    <div class="form-section">
+        <div class="form-container" id="registerForm">
+            <h2>Register</h2>
+            <form id="register">
+                <div class="form-group">
+                    <label>First Name</label>
+                    <input type="text" class="form-control" id="firstName" required>
+                </div>
+                <div class="form-group">
+                    <label>Last Name</label>
+                    <input type="text" class="form-control" id="lastName" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" class="form-control" id="email" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    < input type="password" class="form-control" id="password" required>
+                </div>
+                <div class="form-group">
+                    <label>Role</label>
+                    <select class="form-control" id="role" required>
+                        <option value="USER">User </option>
+                        <option value="ADMIN">Admin</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Register</button>
+            </form>
+        </div>
+
+        <div class="form-container" id="loginForm">
+            <h2>Login</h2>
+            <form id="login">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" class="form-control" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Login</button>
+                <span class="toggle-link" onclick="showForm('register')">
+                    Don't have an account? Register
+                </span>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="popover" id="successPopover">User  Credential saved successfully</div>
+
+<script>
+    function showForm(formType) {
+        const registerForm = document.getElementById('registerForm');
+        const loginForm = document.getElementById('loginForm');
+        const toggleButton = document.getElementById('toggle-button');
+        const formMessage = document.getElementById('form-message');
+
+        if (formType === 'login') {
+            registerForm.classList.remove('active');
+            loginForm.classList.add('active');
+            toggleButton.textContent = 'Need an Account? Register';
+            toggleButton.onclick = () => showForm('register');
+            formMessage.textContent = 'Welcome back! Please login to continue';
+        } else {
+            loginForm.classList.remove('active');
+            registerForm.classList.add('active');
+            toggleButton.textContent = 'Have an Account? Login';
+            toggleButton.onclick = () => showForm('login');
+            formMessage.textContent = 'Create your account to get started';
+        }
+    }
+
+    showForm('login');
+
+    function showPopover(elementId, message, duration = 3000) {
+        const popover = document.getElementById(elementId);
+        popover.textContent = message;
+        popover.style.display = 'block';
+        setTimeout(() => popover.style.display = 'none', duration);
+    }
+
+    document.getElementById('register').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const user = {
+            firstName: document.getElementById('firstName').value,
+            lastName: document.getElementById('lastName').value,
+            email: document.getElementById('email').value,
+            password: document.getElementById('password').value,
+            role: document.getElementById('role').value
+        };
+
+        const response = await fetch('http://localhost:8080/api/users/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(user)
+        });
+
+        if (response.ok) {
+            showPopover('successPopover', 'User  Credential saved successfully');
+            document.getElementById('register').reset();
+        } else {
+            alert('Registration failed. Check console for errors.');
+        }
+    });
+
+    document.getElementById('login').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const user = {
+            email: document.querySelector('#login input[type="email"]').value,
+            password: document.querySelector('#login input[type="password"]').value
+        };
+
+        const response = await fetch('http://localhost:8080/api/users/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(user)
+        });
+
+        if (response.ok) {
+            const loggedInUser  = await response.json();
+            createDashboard(loggedInUser , loggedInUser .role === 'ADMIN');
+        } else {
+            alert('Login failed. Please check your credentials.');
+        }
+    });
+
+    function createDashboard(user, isAdmin = false) {
+        document.body.innerHTML = `
+            <div class="dashboard-container">
+                ${isAdmin ? adminDashboardContent(user) : userDashboardContent()}
+            </div>
+        `;
+
+        if (!isAdmin) {
+            document.getElementById('jokeButton').addEventListener('click', fetchJoke);
+        }
+    }
+
+    function adminDashboardContent(user) {
+        return `
+            <h2>Admin Dashboard</h2>
+            <p>Welcome, ${user.firstName} ${user.lastName} !</p>
+            <button onclick="manageUsers()">Manage Users</button>
+            <div id="userManagement" style="display:none;">
+                <h3>User Management</h3>
+                <p>Here you can manage users.</p>
+            </div>
+        `;
+    }
+
+    function userDashboardContent() {
+        return `
+        <div class="category-selectors">
+            <div class="checkbox-group">
+                <h3>Choose joke categories:</h3>
+                <label>
+                    <input type="checkbox" name="jokeCategory" value="Programming" checked>
+                    Programming
+                </label>
+                <label>
+                    <input type="checkbox" name="jokeCategory" value="Pun">
+                    Pun
+                </label>
+                <label>
+                    <!-- Corrected from Miscellaneous to Misc -->
+                    <input type="checkbox" name="jokeCategory" value="Misc">
+                    Miscellaneous
+                </label>
+                <label>
+                    <!-- Seasonal category changed to Halloween -->
+                    <input type="checkbox" name="jokeCategory" value="Halloween">
+                    Spooky
+                </label>
+                <label>
+                    <input type="checkbox" name="jokeCategory" value="Christmas">
+                    Christmas
+                </label>
+                <label>
+                    <input type="checkbox" name="jokeCategory" value="Dark">
+                    Dark
+                </label>
+            </div>
+        </div>
+        <button id="jokeButton" class="btn btn-primary">Humor Me!</button>
+        <div id="jokeContainer" class="joke-container"></div>
+    `;
+    }
+
+    function fetchJoke() {
+        const checkboxes = document.querySelectorAll('input[name="jokeCategory"]:checked');
+        let categories = Array.from(checkboxes).map(cb => cb.value);
+
+        // API restriction handling
+        const hasDark = categories.includes('Dark');
+        const hasSeasonal = categories.some(c => ['Christmas', 'Halloween'].includes(c));
+        const hasRegular = categories.some(c => ['Programming', 'Misc', 'Pun'].includes(c));
+
+        if (hasDark && categories.length > 1) {
+            document.getElementById('jokeContainer').innerHTML =
+                `<p>⚠️ Dark jokes must be requested alone</p>`;
+            return;
+        }
+
+        if (hasSeasonal && hasRegular) {
+            document.getElementById('jokeContainer').innerHTML =
+                `<p>⚠️ Can't mix seasonal and regular categories</p>`;
+            return;
+        }
+
+        const endpoint = `https://v2.jokeapi.dev/joke/${categories.join(',')}`;
+
+        fetch(endpoint)
+            .then(response => {
+                if (!response.ok) throw new Error('Failed to fetch joke');
+                return response.json();
+            })
+            .then(data => {
+                if (data.error) throw new Error(data.message);
+                displayJoke(data);
+            })
+            .catch(error => {
+                document.getElementById('jokeContainer').innerHTML =
+                    `<p>😅 Joke failed: ${error.message}</p>`;
+            });
+    }
+    function displayJoke(jokeData) {
+        const container = document.getElementById('jokeContainer');
+        let content = '';
+
+        if (jokeData.type === 'twopart') {
+            content = `
+                <div class="joke-content">
+                    <p>${jokeData.setup}</p>
+                    <p class="punchline">${jokeData.delivery}</p>
+                </div>
+            `;
+        } else {
+            content = `
+                <div class="joke-content">
+                    <p>${jokeData.joke}</p>
+                </div>
+            `;
+        }
+
+        container.innerHTML = content;
+    }
+</script>
+</body>
+</html>
