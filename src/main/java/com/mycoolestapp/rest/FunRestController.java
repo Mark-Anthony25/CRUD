@@ -7,11 +7,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController
+@Controller
 @RequestMapping("/api/users")
 @CrossOrigin(origins = "*")
 public class FunRestController {
@@ -70,6 +72,10 @@ public class FunRestController {
         userService.emailValidation(user.getEmail());
         return userService.registerUser(user);
     }
+    @GetMapping("/register")
+    public String showLoginPage(Model model) {
+        return "redirect:/api/users/register";
+    }
 
     @RequestMapping("/getusers")
     public List<User> getUsers() {
@@ -91,6 +97,12 @@ public class FunRestController {
     @DeleteMapping("/delete/{id}")
     public void deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
+    }
+    @GetMapping("/login")
+    public String showLoginPage() {
+        // Optionally add model attributes if needed
+//        model.addAttribute("login", new login());
+        return "login"; // This renders login.html
     }
     @PostMapping("/login")
     public ResponseEntity<User> login(@RequestBody User user) {

@@ -49,7 +49,6 @@ public User registerUser(User user){
         if(existingUser != null){
             throw new RuntimeException ("Email already exists");
         }
-
     }
     public String greet(){
         return "Hello World";

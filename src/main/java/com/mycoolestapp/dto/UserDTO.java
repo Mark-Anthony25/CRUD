@@ -12,5 +12,4 @@ public class UserDTO {
     @NotBlank(message = "Password is required")
     //@Size(min = 8, message = "Password 8 characters at least")
     private String password;
-
 }
