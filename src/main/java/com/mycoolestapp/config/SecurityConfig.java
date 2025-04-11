@@ -20,11 +20,13 @@ public class SecurityConfig {
                         .requestMatchers("/api/users/register").permitAll()
                         .requestMatchers("/api/users/login").permitAll()
                         .requestMatchers("/api/users/**").permitAll()
+//                        .requestMatchers(HttpMethod.GET, "api/users/getusers").hasRole("USER")
                         .anyRequest().authenticated()
                 )
                 .httpBasic(Customizer.withDefaults()); // Optional: basic auth for protected endpoints
 
         return http.build();
     }
+
 
 }

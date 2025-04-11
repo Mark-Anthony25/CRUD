@@ -15,6 +15,7 @@ public class User {
     @NotNull
     private String lastName;
 
+
     private String email;
     @NotNull
     //@Size(min = 8, max = 30)
@@ -28,8 +29,10 @@ public class User {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
+
         this.password = password;
         this.role = role;
+
     }
 
     public long getId() {
@@ -64,6 +67,7 @@ public class User {
         this.email = email;
     }
 
+
     public String getPassword() {
         return password;
     }
@@ -77,6 +81,7 @@ public class User {
     public void setRole(String role) {
         this.role = role;
     }
+
 
 
 }
