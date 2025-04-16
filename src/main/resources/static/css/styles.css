@@ -1,8 +1,13 @@
 :root {
     --primary-color: #1c6ca7;
     --secondary-color: #bfdbfe;
+    --dark-color: #333;
+    --light-color: #fff;
+    --toggle-on-color: #3b82f6; /* Blue for active toggle */
+    --toggle-off-color: #e0f2fe; /* Light blue for inactive toggle */
 }
 
+/* General body styling */
 body {
     margin: 0;
     background-color: var(--secondary-color);
@@ -10,7 +15,7 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    font-family: Arial, sans-serif;
+    font-family: 'Poppins', sans-serif;
 }
 
 .container {
@@ -46,29 +51,23 @@ body {
 }
 
 .btn {
-    border: none;
-    padding: 10px 20px;
-    cursor: pointer;
-    border-radius: 4px;
-    transition: opacity 0.3s ease;
-}
-
-.btn:hover {
-    opacity: 0.9;
-}
-
-.btn-primary {
-    background: var(--primary-color);
-    color: white;
-}
-
-.btn-secondary {
     background-color: #3b82f6; /* Equivalent to bg-blue-500 */
     color: white; /* Equivalent to text-white */
     padding: 0.5rem 1.5rem; /* Equivalent to px-6 py-2 */
     border-radius: 9999px; /* Equivalent to rounded-full */
     border: none;
     cursor: pointer;
+    transition: opacity 0.3s ease, transform 0.2s ease;
+}
+
+.btn:hover {
+    opacity: 0.9;
+    transform: scale(1.05);
+}
+
+.btn-primary {
+    background: var(--primary-color);
+    color: white;
 }
 
 .form-group {
@@ -83,10 +82,11 @@ body {
     box-sizing: border-box;
 }
 
+/* Updated the toggle-link color to white for better visibility */
 .toggle-link {
     margin-top: 1rem;
     display: block;
-    color: var(--primary-color);
+    color: var(--light-color); /* Changed to white for better contrast */
     cursor: pointer;
     text-decoration: underline;
 }
@@ -108,29 +108,28 @@ body {
     from { opacity: 0; transform: translateY(-10px); }
     to { opacity: 1; transform: translateY(0); }
 }
-.joke-container {
-    background-color: #e0f2fe; /* Equivalent to bg-blue-100 */
-    padding: 1.5rem; /* Equivalent to p-6 */
+
+/* Dashboard container styling */
+.dashboard-container {
+    background-color: #93c5fd; /* Equivalent to bg-blue-300 */
+    padding: 2rem; /* Equivalent to p-8 */
     border-radius: 0.5rem; /* Equivalent to rounded-lg */
-    box-shadow: inset 0px 2px 4px rgba(0, 0, 0, 0.1); /* Equivalent to shadow-inner */
-    height: 10rem; /* Equivalent to h-40 */
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Equivalent to shadow-lg */
+    width: 100%;
+    max-width: 64rem; /* Equivalent to max-w-4xl */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
 }
 
-.joke-content p {
-    margin: 0.5rem 0;
-    color: #333;
-}
-
-.punchline {
-    font-weight: bold;
-    color: var(--primary-color);
-    margin-top: 1rem !important;
-}
+/* Category selectors styling */
 .category-selectors {
     display: flex;
+    flex-direction: column;
+    align-items: center;
     gap: 1rem;
     margin-bottom: 1.5rem;
-    justify-content: center;
 }
 
 .category-selectors p {
@@ -139,40 +138,65 @@ body {
     color: #2563eb; /* Equivalent to text-blue-700 */
     margin-bottom: 1rem;
 }
+
 .checkbox-group {
     display: flex;
     flex-wrap: wrap;
     gap: 1rem;
-    /*margin-bottom: 1.5rem;*/
 }
 
-.checkbox-group label {
-    display: flex;
+.toggle-button {
+    display: inline-flex;
     align-items: center;
-    background-color: #e0f2fe; /* Equivalent to bg-blue-100 */
+    background-color: var(--toggle-off-color);
     padding: 0.5rem 1rem; /* Equivalent to px-4 py-2 */
     border-radius: 9999px; /* Equivalent to rounded-full */
     cursor: pointer;
-}
-.checkbox-group input {
-    margin-right: 0.5rem; /* Equivalent to mr-2 */
+    transition: background 0.3s ease, transform 0.2s ease;
 }
 
-.checkbox-group label:hover {
-    background: #e0e0e0;
+.toggle-button.active {
+    background-color: var(--toggle-on-color);
+    color: var(--light-color);
 }
 
-.checkbox-group h3 {
-    width: 100%;
-    margin-bottom: 0.5rem;
-    color: var(--primary-color);
+.toggle-button:hover {
+    transform: scale(1.05);
 }
 
+/* Joke container styling */
 .joke-container {
-    margin-top: 1rem;
-    min-height: 100px;
+    background-color: #e0f2fe; /* Equivalent to bg-blue-100 */
+    padding: 1.5rem; /* Equivalent to p-6 */
+    border-radius: 0.5rem; /* Equivalent to rounded-lg */
+    box-shadow: inset 0px 2px 4px rgba(0, 0, 0, 0.1); /* Equivalent to shadow-inner */
+    min-height: 10rem; /* Equivalent to h-40 */
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
+.joke-container p {
+    margin: 0.5rem 0;
+    color: #333;
+}
+
+.joke-container .punchline {
+    font-weight: bold;
+    color: var(--primary-color);
+    margin-top: 1rem !important;
+}
+
+/* Title container styling */
+.title-container {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+}
+
+/* Responsive Design */
 @media (max-width: 768px) {
     .container {
         flex-direction: column;
@@ -183,13 +207,22 @@ body {
     .form-section {
         width: 100%;
     }
-}
 
-.dashboard-container {
-    background-color: #93c5fd; /* Equivalent to bg-blue-300 */
-    padding: 2rem; /* Equivalent to p-8 */
-    border-radius: 0.5rem; /* Equivalent to rounded-lg */
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Equivalent to shadow-lg */
-    width: 100%;
-    max-width: 64rem; /* Equivalent to max-w-4xl */
+    .dashboard-container {
+        width: 90%;
+    }
+
+    .category-selectors {
+        gap: 0.75rem;
+    }
+
+    .btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem; /* Equivalent to text-sm */
+    }
+
+    .joke-container {
+        padding: 1rem;
+        font-size: 0.875rem;
+    }
 }

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Joke Generator</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}" />
+</head>
+<body>
+        <!-- Title -->
+    <div class="title-container">
+        <h1>JOKE GENERATOR</h1>
+    </div>
+    <div class="dashboard-container">
+        <!-- Category Selectors -->
+        <div class="category-selectors">
+            <p>Choose joke categories:</p>
+            <div class="checkbox-group">
+                <div class="toggle-button" id="programming" data-value="Programming">Programming</div>
+                <div class="toggle-button" id="pun" data-value="Pun">Pun</div>
+                <div class="toggle-button" id="misc" data-value="Misc">Miscellaneous</div>
+                <div class="toggle-button" id="halloween" data-value="Halloween">Spooky</div>
+                <div class="toggle-button" id="christmas" data-value="Christmas">Christmas</div>
+                <div class="toggle-button" id="dark" data-value="Dark">Dark</div>
+            </div>
+        </div>
+
+        <!-- CTA Button -->
+        <button id="jokeButton" class="btn">Humor Me!</button>
+
+        <!-- Joke Display Container -->
+        <div id="jokeContainer" class="joke-container">
+            <p>Click "Humor Me!" to get a joke!</p>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        const jokeButton = document.getElementById('jokeButton');
+        const jokeContainer = document.getElementById('jokeContainer');
+        const toggleButtons = document.querySelectorAll('.toggle-button');
+
+        toggleButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                button.classList.toggle('active');
+            });
+        });
+
+        jokeButton.addEventListener('click', async () => {
+            jokeContainer.innerHTML = '<p>Loading...</p>';
+
+            const selectedCategories = Array.from(document.querySelectorAll('.toggle-button.active'))
+                .map(button => button.getAttribute('data-value'))
+                .join(',');
+
+            const apiUrl = `https://v2.jokeapi.dev/joke/${selectedCategories}`;
+            try {
+                const response = await fetch(apiUrl);
+                const jokeData = await response.json();
+
+                if (jokeData.type === 'single') {
+                    jokeContainer.innerHTML = `<p>${jokeData.joke}</p>`;
+                } else if (jokeData.type === 'twopart') {
+                    jokeContainer.innerHTML = `<p>${jokeData.setup}</p><p class="punchline">${jokeData.delivery}</p>`;
+                } else {
+                    jokeContainer.innerHTML = '<p>No jokes found!</p>';
+                }
+            } catch (error) {
+                jokeContainer.innerHTML = '<p>Failed to fetch a joke. Please choose joke from the category</p>';
+            }
+        });
+    </script>
+    </body>
+</html>

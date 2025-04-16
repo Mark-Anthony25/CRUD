@@ -3,10 +3,11 @@ package com.mycoolestapp.rest;
 import com.mycoolestapp.Coach;
 import com.mycoolestapp.entity.User;
 import com.mycoolestapp.service.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +18,7 @@ import java.util.List;
 @RequestMapping("/api/users")
 @CrossOrigin(origins = "*")
 public class FunRestController {
+    private static final Logger logger = LoggerFactory.getLogger(FunRestController.class);
     private final UserService userService;
     private final Coach myCoach;
 
@@ -26,92 +28,102 @@ public class FunRestController {
         this.userService = userService;
     }
 
-    @GetMapping("/mark")
-    public String hello(){
-        return "hello world!!!";
-    }
-
-    @GetMapping("/greet")
-    public String greet(){
-        return userService.greet();
-    }
-
-
-    @GetMapping("/work")
-    public String work(){
-        return "work";
-    }
-    @GetMapping("/lucky")
-    public String lucky(){
-        return "today is lucky" + getTraining();
-    }
-
-    @GetMapping("/basketball")
-    public Coach getMyCoach() {
-        return myCoach;
-    }
-//    @Autowired
-//    public void setMyCoach(Coach myCoach) {
-//        this.myCoach = myCoach;
-//    }
-    @GetMapping("/training")
-    public String getTraining(){
-        return myCoach.getTimeWorkout().toString();
-    }
-
-
-    //back-end for register form
-//    @Autowired
-//    public void UserService(UserService userService) {
-//        this.userService = userService;
-//    }
-    private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
     @PostMapping("/register")
-    public User registerUser(@RequestBody User user) {
-        user.setPassword(encoder.encode(user.getPassword()));
-        userService.emailValidation(user.getEmail());
-        return userService.registerUser(user);
+    public ResponseEntity<?> registerUser(@RequestBody User user) {
+        try {
+            User registeredUser = userService.registerUser(user);
+            return ResponseEntity.ok(registeredUser);
+        } catch (Exception e) {
+            logger.error("Error during user registration", e);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Registration failed: " + e.getMessage());
+        }
     }
+
     @GetMapping("/register")
-    public String showLoginPage(Model model) {
+    public String redirectRegisterPage(Model model) {
         return "redirect:/api/users/register";
     }
 
-    @RequestMapping("/getusers")
-    public List<User> getUsers() {
-        return userService.getUsers();
+    @GetMapping("/getusers")
+    public ResponseEntity<List<User>> getUsers() {
+        return ResponseEntity.ok(userService.getUsers());
     }
 
-    @PutMapping ("/update/{id}")
-    public User updateUser(@PathVariable Long id, @RequestBody User user) {
-        user.setId(id);
-        userService.updateUser(user);
-        return userService.updateUser(user);
+    @PutMapping("/update/{id}")
+    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody User user) {
+        try {
+            User updatedUser = userService.updateUser(id, user);
+            return ResponseEntity.ok(updatedUser);
+        } catch (Exception e) {
+            logger.error("Error updating user", e);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Update failed: " + e.getMessage());
+        }
     }
-//    @PatchMapping("update/{id}")
-//    public User patchUser(@PathVariable Long id, @RequestBody User user) {
-//        user.setId(id);
-//        userService.updateUser(user);
-//        return userService.updateUser(user);
-//    }
+
     @DeleteMapping("/delete/{id}")
-    public void deleteUser(@PathVariable Long id) {
-        userService.deleteUser(id);
+    public ResponseEntity<?> deleteUser(@PathVariable Long id) {
+        try {
+            userService.deleteUser(id);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            logger.error("Error deleting user", e);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Delete failed: " + e.getMessage());
+        }
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateUserDirect(@PathVariable Long id, @RequestBody User user) {
+        try {
+            User updatedUser = userService.updateUser(id, user);
+            return ResponseEntity.ok(updatedUser);
+        } catch (Exception e) {
+            logger.error("Error updating user", e);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Update failed: " + e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteUserDirect(@PathVariable Long id) {
+        try {
+            userService.deleteUser(id);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            logger.error("Error deleting user", e);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Delete failed: " + e.getMessage());
+        }
+    }
+
     @GetMapping("/login")
     public String showLoginPage() {
-        // Optionally add model attributes if needed
-//        model.addAttribute("login", new login());
-        return "login"; // This renders login.html
+        return "login";
     }
+
     @PostMapping("/login")
-    public ResponseEntity<User> login(@RequestBody User user) {
+    public ResponseEntity<?> login(@RequestBody User user) {
         User existingUser = userService.findUserByEmail(user.getEmail());
-        if(existingUser != null || !encoder.matches(user.getPassword(), existingUser.getPassword())) {
-
+        if (existingUser == null || !userService.checkPassword(user.getPassword(), existingUser.getPassword())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
         }
-        return new ResponseEntity<>(existingUser, HttpStatus.OK);
+        // Return only non-sensitive fields
+        User safeUser = new User();
+        safeUser.setId(existingUser.getId());
+        safeUser.setEmail(existingUser.getEmail());
+        safeUser.setRole(existingUser.getRole());
+        return ResponseEntity.ok(safeUser);
     }
 
+    @GetMapping("/joke-generator")
+    public String showJokeGeneratorPage() {
+        return "joke-generator";
+    }
 
+    @GetMapping("/joke-generator-login")
+    public String showJokeGeneratorGenericPage() {
+        return "joke-generator-login";
+    }
+
+    @GetMapping("/admin-dashboard")
+    public String showAdminDashboard() {
+        return "admin-dashboard";
+    }
 }
