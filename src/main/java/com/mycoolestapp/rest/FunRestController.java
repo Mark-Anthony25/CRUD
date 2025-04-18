@@ -2,6 +2,8 @@ package com.mycoolestapp.rest;
 
 import com.mycoolestapp.Coach;
 import com.mycoolestapp.entity.User;
+import com.mycoolestapp.entity.history;
+import com.mycoolestapp.service.HistoryService;
 import com.mycoolestapp.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+
 @Controller
 @RequestMapping("/api/users")
 @CrossOrigin(origins = "*")
@@ -21,11 +24,13 @@ public class FunRestController {
     private static final Logger logger = LoggerFactory.getLogger(FunRestController.class);
     private final UserService userService;
     private final Coach myCoach;
+    private final HistoryService historyService;
 
     @Autowired
-    public FunRestController(Coach myCoach, UserService userService) {
+    public FunRestController(Coach myCoach, UserService userService, HistoryService historyService) {
         this.myCoach = myCoach;
         this.userService = userService;
+        this.historyService = historyService;
     }
 
     @PostMapping("/register")
@@ -125,5 +130,25 @@ public class FunRestController {
     @GetMapping("/admin-dashboard")
     public String showAdminDashboard() {
         return "admin-dashboard";
+    }
+
+    @PostMapping("/history")
+    public ResponseEntity<?> getHistory(@RequestBody history historyRecord) {
+        try {
+
+            history saved = historyService.saveHistory(historyRecord);
+            return ResponseEntity.ok(saved);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error saving history: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/history/{id}")
+    public ResponseEntity<?> getHistoryById(@PathVariable Long id) {
+        User user = userService.findUserById(id);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
+        return ResponseEntity.ok(historyService.getLast10HistoryByUser(user));
     }
 }

@@ -82,6 +82,11 @@ public class User {
         this.role = role;
     }
 
+//    @OneToMany(mappedBy = 'user', cascade = CascadeType.ALL, orphanRemoval = true)
+//    public List<history> getHistories(){
+//        return getHistories;
+//    }
+
 
 
 }
