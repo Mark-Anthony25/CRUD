@@ -5,6 +5,7 @@ import com.mycoolestapp.entity.User;
 import com.mycoolestapp.entity.history;
 import com.mycoolestapp.service.HistoryService;
 import com.mycoolestapp.service.UserService;
+import com.mycoolestapp.dto.HistoryRequestDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 
 
@@ -133,8 +136,21 @@ public class FunRestController {
     }
 
     @PostMapping("/history")
-    public ResponseEntity<?> getHistory(@RequestBody history historyRecord) {
+    public ResponseEntity<?> saveHistory(@RequestBody HistoryRequestDTO dto) {
         try {
+            User user = userService.findUserById(dto.getUserId());
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User not found");
+            }
+            history historyRecord = new history();
+            historyRecord.setJokeText(dto.getJokeText());
+            historyRecord.setCategory(dto.getCategory());
+            try {
+                historyRecord.setGeneratedAt(LocalDateTime.parse(dto.getGeneratedAt()));
+            } catch (DateTimeParseException e) {
+                historyRecord.setGeneratedAt(LocalDateTime.now());
+            }
+            historyRecord.setUser(user);
 
             history saved = historyService.saveHistory(historyRecord);
             return ResponseEntity.ok(saved);

@@ -45,6 +45,17 @@
             });
         });
 
+        
+        function getLoggedInUserId() {
+            const user = localStorage.getItem('user');
+            if (user) {
+                try {
+                    return JSON.parse(user).id;
+                } catch (e) { return null; }
+            }
+            return null;
+        }
+
         jokeButton.addEventListener('click', async () => {
             jokeContainer.innerHTML = '<p>Loading...</p>';
 
@@ -56,13 +67,32 @@
             try {
                 const response = await fetch(apiUrl);
                 const jokeData = await response.json();
-
+                let jokeText = '';
                 if (jokeData.type === 'single') {
+                    jokeText = jokeData.joke;
                     jokeContainer.innerHTML = `<p>${jokeData.joke}</p>`;
                 } else if (jokeData.type === 'twopart') {
+                    jokeText = jokeData.setup + ' ' + jokeData.delivery;
                     jokeContainer.innerHTML = `<p>${jokeData.setup}</p><p class="punchline">${jokeData.delivery}</p>`;
                 } else {
                     jokeContainer.innerHTML = '<p>No jokes found!</p>';
+                    return;
+                }
+
+                // Store joke in backend history if user is logged in
+                const userId = getLoggedInUserId();
+                if (userId) {
+                    const historyPayload = {
+                        jokeText: jokeText,
+                        category: selectedCategories,
+                        generatedAt: new Date().toISOString(),
+                        userId: userId
+                    };
+                    fetch('/api/users/history', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(historyPayload)
+                    });
                 }
             } catch (error) {
                 jokeContainer.innerHTML = '<p>Failed to fetch a joke. Please choose joke from the category</p>';
