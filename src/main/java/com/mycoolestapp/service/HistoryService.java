@@ -22,4 +22,15 @@ public class HistoryService {
     public history saveHistory(history historyRecord) {
         return historyRepository.save(historyRecord);
     }
+    public void deleteHistoryById(Long id) {
+        historyRepository.deleteById(id);
+    }
+
+    public history getHistoryById(Long id) {
+        return historyRepository.findById(id).orElse(null);
+    }
+
+    public List<history> getAllHistory() {
+        return historyRepository.findAll();
+    }
 }

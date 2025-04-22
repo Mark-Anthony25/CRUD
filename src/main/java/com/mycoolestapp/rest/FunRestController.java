@@ -18,6 +18,9 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.List;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 
 @Controller
@@ -167,4 +170,16 @@ public class FunRestController {
         }
         return ResponseEntity.ok(historyService.getLast10HistoryByUser(user));
     }
+    @GetMapping("/analytics")
+    public String showAnalyticsPage() {
+        return "analytics";
+    }
+    @GetMapping("/history/all")
+    public ResponseEntity<List<history>> getAllHistory() {
+        List<history> allHistory = historyService.getAllHistory();
+        return ResponseEntity.ok(allHistory);
+    }
+    
+    
+    
 }

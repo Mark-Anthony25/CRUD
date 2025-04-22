@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics Dashboard</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { background: #f4f6f8; }
+        .dashboard-wrapper { display: flex; min-height: 100vh; }
+        .sidebar {
+            width: 240px;
+            background: #212529;
+            color: #fff;
+            padding: 32px 0 0 0;
+            min-height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            z-index: 100;
+        }
+        .sidebar .nav-link {
+            color: #adb5bd;
+            padding: 16px 32px;
+            font-size: 1.1rem;
+            border-left: 4px solid transparent;
+            transition: background 0.2s, color 0.2s, border-color 0.2s;
+        }
+        .sidebar .nav-link.active, .sidebar .nav-link:hover {
+            color: #fff;
+            background: #343a40;
+            border-left: 4px solid #0d6efd;
+        }
+        .sidebar .sidebar-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #fff;
+            padding: 0 32px 24px 32px;
+            letter-spacing: 1px;
+        }
+        .main-content {
+            margin-left: 240px;
+            padding: 40px 24px;
+            width: 100%;
+        }
+        .dashboard-container { 
+            background: #fff; 
+            border-radius: 12px; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07); 
+            padding: 32px; 
+            margin-bottom: 32px;
+        }
+        .table thead { background: #f1f3f6; }
+        @media (max-width: 900px) {
+            .sidebar { width: 100px; padding: 16px 0; }
+            .sidebar .sidebar-title { font-size: 1rem; padding: 0 16px 16px 16px; }
+            .sidebar .nav-link { font-size: 0.95rem; padding: 12px 16px; }
+            .main-content { margin-left: 100px; padding: 24px 8px; }
+        }
+        .chart-container {
+            margin-bottom: 32px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+            padding: 24px;
+        }
+    </style>
+</head>
+<body>
+<div class="dashboard-wrapper">
+    <!-- Sidebar Navigation -->
+    <nav class="sidebar d-flex flex-column">
+        <div class="sidebar-title mb-4">Admin Panel</div>
+        <ul class="nav flex-column mb-4">
+            <li class="nav-item">
+                <a class="nav-link" href="/api/users/admin-dashboard">User Management</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="/api/users/analytics">Analytics</a>
+            </li>
+        </ul>
+    </nav>
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="dashboard-container">
+            <h2 class="mb-4">Joke History Analytics</h2>
+            <div class="row">
+                <div class="col-lg-6 chart-container">
+                    <h5>Jokes by Category</h5>
+                    <canvas id="categoryBarChart" height="180"></canvas>
+                </div>
+                <div class="col-lg-6 chart-container">
+                    <h5>Jokes Over Time</h5>
+                    <canvas id="jokesLineChart" height="180"></canvas>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12 chart-container">
+                    <h5>Recent Jokes Table</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle" id="historyTable">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Category</th>
+                                    <th>Joke</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Data will be injected here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Fetch all joke history for analytics
+async function fetchHistory() {
+    // You may want to create a dedicated endpoint for all history, or use admin privileges
+    const response = await fetch('/api/users/history/all');
+    if (!response.ok) return [];
+    return await response.json();
+}
+
+// Utility: format date
+function formatDate(dateStr) {
+    const date = new Date(dateStr);
+    return date.toLocaleString();
+}
+
+// Render Table
+function renderHistoryTable(history) {
+    const tbody = document.querySelector('#historyTable tbody');
+    tbody.innerHTML = '';
+    history.forEach((item, idx) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${idx + 1}</td>
+            <td>${item.category}</td>
+            <td>${item.jokeText}</td>
+            <td>${formatDate(item.generatedAt)}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+// Render Bar Chart (Jokes by Category)
+function renderCategoryBarChart(history) {
+    const ctx = document.getElementById('categoryBarChart').getContext('2d');
+    const categoryCounts = {};
+    history.forEach(item => {
+        categoryCounts[item.category] = (categoryCounts[item.category] || 0) + 1;
+    });
+    const data = {
+        labels: Object.keys(categoryCounts),
+        datasets: [{
+            label: 'Jokes',
+            data: Object.values(categoryCounts),
+            backgroundColor: '#0d6efd'
+        }]
+    };
+    new Chart(ctx, {
+        type: 'bar',
+        data: data,
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } }
+        }
+    });
+}
+
+// Render Line Chart (Jokes Over Time)
+function renderJokesLineChart(history) {
+    const ctx = document.getElementById('jokesLineChart').getContext('2d');
+    // Group by date (YYYY-MM-DD)
+    const dateCounts = {};
+    history.forEach(item => {
+        const date = item.generatedAt.split('T')[0];
+        dateCounts[date] = (dateCounts[date] || 0) + 1;
+    });
+    const sortedDates = Object.keys(dateCounts).sort();
+    const data = {
+        labels: sortedDates,
+        datasets: [{
+            label: 'Jokes Generated',
+            data: sortedDates.map(d => dateCounts[d]),
+            fill: false,
+            borderColor: '#198754',
+            tension: 0.1
+        }]
+    };
+    new Chart(ctx, {
+        type: 'line',
+        data: data,
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } }
+        }
+    });
+}
+
+// Main load
+(async function() {
+    const history = await fetchHistory();
+    renderHistoryTable(history);
+    renderCategoryBarChart(history);
+    renderJokesLineChart(history);
+})();
+</script>
+</body>
+</html>
